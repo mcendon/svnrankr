@@ -1,12 +1,19 @@
 # svnrankr
-SVN user ranking by revision/commit interesting numbers (criterias: prime numbers, simetrical numbers, etc)
+SVN user ranking by revision/commit interesting numbers
 
+"Interesting" numbers criteria
+
+* Prime numbers
+* Stair numbers (1234, 2345, 3456, etc)
+* Symmetrical numbers (1221, 1111, 34344343)
+* Multiples of 100 (100, 900, 1000, 5000, etc)
+
+Feel free to fork and add other interesting criterias!
+
+#Log
 SVNRankr needs a valid SVN log export to work
-
 Run the following code from the command line to obtain a full log export:
-
-#!/bin/bash
 svn log -q > svn.log
 
-Use:
+#Use
 python svnrankr.py svn.log
