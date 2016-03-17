@@ -1,4 +1,4 @@
-import argparse, os, operator
+import argparse, os, operator, sys
 from math import sqrt
 from itertools import count, islice
 
@@ -71,8 +71,11 @@ parser.add_argument('file', metavar='File', type=str, nargs=1,
 svnrankr = SvnRankr()
 args = parser.parse_args()
 filename = args.file[0]
-if os.path.isfile(filename):
-    infile = open(filename, 'r')
+if os.path.isfile(filename) or filename == 'stdin':
+    if filename == 'stdin':
+        infile = sys.stdin
+    else:
+        infile = open(filename, 'r')    
     line = infile.readline()
     while line != '':
         if line[0] == 'r':
