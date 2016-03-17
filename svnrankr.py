@@ -28,7 +28,14 @@ class SvnRankr:
         return lineArr
 
     def isInteresting(self, n):
-        return (n % 100 == 0 or self.isPrime(n) or self.isStair(n) or self.isSimetrical(n))
+        return (self.oneHundredMultiple(n)
+        or self.isPrime(n)
+        or self.isStair(n)
+        or self.isSymmetrical(n)
+        or self.isMirror(n))
+
+    def oneHundredMultiple(self, n):
+        return n % 100 == 0
 
     # 1, 3, 5, 7, 11, etc
     def isPrime(self, n):
@@ -45,7 +52,7 @@ class SvnRankr:
         return True
 
     #1221 / 1331 / 2332 / 1111 / 55555
-    def isSimetrical(self, n):
+    def isSymmetrical(self, n):
         numberList = list(str(n))
         length = len(numberList)
         for i in range(0,length):
@@ -53,15 +60,19 @@ class SvnRankr:
                 return False
         return True
 
+    def isMirror(self, n):
+        strn = str(n)
+        digits = len(strn)
+        return digits % 2 == 0 and strn[:digits / 2] == strn[-digits / 2:]
+
 parser = argparse.ArgumentParser(description='Make an SVN commit ranking, by interesting commit numbers.')
 parser.add_argument('file', metavar='File', type=str, nargs=1,
                    help='SVN log database file')
-
+svnrankr = SvnRankr()
 args = parser.parse_args()
 filename = args.file[0]
 if os.path.isfile(filename):
     infile = open(filename, 'r')
-    svnrankr = SvnRankr()
     line = infile.readline()
     while line != '':
         if line[0] == 'r':
