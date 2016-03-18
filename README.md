@@ -13,8 +13,15 @@ Feel free to fork and add other interesting criterias!
 
 #Log
 SVNRankr needs a valid SVN log export to work
+
 Run the following code from the command line to obtain a full log export:
-svn log -q > svn.log
+svn log -q [REMOTE_URL] > svn.log
+
+*NEW*: Now you can run the script from the standard input
 
 #Use
+File:
 python svnrankr.py svn.log
+
+Standard input:
+svn log -q [REMOTE_URL] | python svnrankr.py stdin
