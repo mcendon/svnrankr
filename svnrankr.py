@@ -1,20 +1,38 @@
-import argparse, os, operator, sys
+import argparse, os, operator, sys, json
 from math import sqrt
 from itertools import count, islice
 
 class SvnRankr:
     def __init__(self):
-        self.ranking = {}
+        self.ranking = {
+            "range": {
+                "date": {"from": None, "to": None},
+                "commits": {"from": None, "to": None}
+            },
+            "results": {}
+        }
 
     def rank(self, logLine):
         data = self.extractData(logLine)
         n = data[0]
         user = data[1]
+        date = data[2]
+
+        if self.ranking["range"]["date"]["to"] == None:
+            self.ranking["range"]["date"]["to"] = date
+        self.ranking["range"]["date"]["from"] = date
+
+        if self.ranking["range"]["commits"]["to"] == None:
+            self.ranking["range"]["commits"]["to"] = n
+        self.ranking["range"]["commits"]["from"] = n
+
+        if user not in self.ranking["results"]:
+            self.ranking["results"][user] = {"all": {"count": 0}, "special": {"count": 0, "numbers": []}}
+        else:
+            self.ranking["results"][user]["all"]["count"] += 1
         if self.isInteresting(n):
-            if user not in self.ranking:
-                self.ranking[user] = 1
-            else:
-                self.ranking[user] += 1
+                self.ranking["results"][user]["special"]["numbers"].append(n)
+                self.ranking["results"][user]["special"]["count"] += 1
 
     def getRanking(self):
         return self.ranking
@@ -75,7 +93,7 @@ if os.path.isfile(filename) or filename == 'stdin':
     if filename == 'stdin':
         infile = sys.stdin
     else:
-        infile = open(filename, 'r')    
+        infile = open(filename, 'r')
     line = infile.readline()
     while line != '':
         if line[0] == 'r':
@@ -83,7 +101,6 @@ if os.path.isfile(filename) or filename == 'stdin':
         line = infile.readline()
     infile.close()
     ranking = svnrankr.getRanking()
-    for user in ranking:
-        print user + ': ' + str(ranking[user])
+    print json.dumps(ranking, sort_keys=True, indent=4, separators=(',', ': '))
 else:
     print 'File not exists: ' + filename
