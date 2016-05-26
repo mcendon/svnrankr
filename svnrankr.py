@@ -1,4 +1,4 @@
-import argparse, os, operator, sys, json
+import argparse, os, operator, sys, json, datetime
 from math import sqrt
 from itertools import count, islice
 
@@ -9,7 +9,8 @@ class SvnRankr:
                 "date": {"from": None, "to": None},
                 "commits": {"from": None, "to": None}
             },
-            "results": {}
+            "results": {},
+            "history": {}
         }
 
     def rank(self, logLine):
@@ -17,6 +18,20 @@ class SvnRankr:
         n = data[0]
         user = data[1]
         date = data[2]
+        now = datetime.datetime.now()
+        dateFields = date.split('-')
+        yearAndMonth = dateFields[0] + dateFields[1]
+        date = yearAndMonth + dateFields[2][:2]
+
+        if user not in self.ranking["history"]:
+            self.ranking["history"][user] = {}
+            for i in range(1, now.month + 1):
+                self.ranking["history"][user][str(now.year) + str(format(i, '02'))] = 0
+
+            if yearAndMonth in self.ranking["history"][user]:
+                self.ranking["history"][user][yearAndMonth] = 1
+        else:
+                self.ranking["history"][user][yearAndMonth] += 1
 
         if self.ranking["range"]["date"]["to"] == None:
             self.ranking["range"]["date"]["to"] = date
@@ -36,6 +51,28 @@ class SvnRankr:
 
     def getRanking(self):
         return self.ranking
+
+    def getRankingForMancy(self):
+        totalCommits = {}
+        specialCommits = {}
+        totalsByMonth = {}
+        evolutionByMonth = {}
+
+        for user in self.ranking["results"]:
+            totalCommits[user] = [self.ranking["results"][user]["all"]["count"]]
+            specialCommits[user] = [self.ranking["results"][user]["special"]["count"]]
+            totalsByMonth[user] = []
+            for month in sorted(self.ranking["history"][user].keys()):
+                totalsByMonth[user].append(self.ranking["history"][user][month])
+            evolutionByMonth[user] = [int(totalsByMonth[user][0])]
+            for i in range(1,len(totalsByMonth[user])):
+                evolutionByMonth[user].append(int(evolutionByMonth[user][i-1]) + int(totalsByMonth[user][i]))
+
+
+        return ['"AMCO Total Commits: "', json.dumps(totalCommits),
+         '"AMCO Special Commits: "', json.dumps(specialCommits),
+         '"AMCO Total Commits by Month: "', json.dumps(totalsByMonth),
+         '"AMCO Evolution by Month: "', json.dumps(evolutionByMonth)]
 
     def extractData(self, line):
         lineArr = line.split('|')
@@ -101,6 +138,9 @@ if os.path.isfile(filename) or filename == 'stdin':
         line = infile.readline()
     infile.close()
     ranking = svnrankr.getRanking()
+    mancyFile = open(os.path.expanduser('~/Desktop/ranking.mancy'), 'w')
+    mancyFile.write(json.dumps(svnrankr.getRankingForMancy()))
+    mancyFile.close()
     print json.dumps(ranking, sort_keys=True, indent=4, separators=(',', ': '))
 else:
     print 'File not exists: ' + filename
