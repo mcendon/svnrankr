@@ -69,10 +69,10 @@ class SvnRankr:
                 evolutionByMonth[user].append(int(evolutionByMonth[user][i-1]) + int(totalsByMonth[user][i]))
 
 
-        return ['"AMCO Total Commits: "', json.dumps(totalCommits),
-         '"AMCO Special Commits: "', json.dumps(specialCommits),
-         '"AMCO Total Commits by Month: "', json.dumps(totalsByMonth),
-         '"AMCO Evolution by Month: "', json.dumps(evolutionByMonth)]
+        return ['"Total Commits: "', json.dumps(totalCommits),
+         '"Special Commits: "', json.dumps(specialCommits),
+         '"Total Commits by Month: "', json.dumps(totalsByMonth),
+         '"Evolution by Month: "', json.dumps(evolutionByMonth)]
 
     def extractData(self, line):
         lineArr = line.split('|')
@@ -85,7 +85,8 @@ class SvnRankr:
     def isInteresting(self, n):
         return (self.oneHundredMultiple(n)
         or self.isPrime(n)
-        or self.isStair(n)
+        or self.isStairUpwards(n)
+        or self.isStairDownwards(n)
         or self.isSymmetrical(n)
         or self.isMirror(n))
 
@@ -96,12 +97,22 @@ class SvnRankr:
     def isPrime(self, n):
         return n > 1 and all(n%i for i in islice(count(2), int(sqrt(n)-1)))
 
-    # 1234 / 4321
-    def isStair(self, n):
+    # 1234
+    def isStairUpwards(self, n):
         numberList = list(str(n))
         pivot = int(numberList[0])
         for i in range(1,len(numberList)):
             if int(numberList[i]) != pivot + 1:
+                return False
+            pivot = int(numberList[i])
+        return True
+
+    # 1234
+    def isStairDownwards(self, n):
+        numberList = list(str(n))
+        pivot = int(numberList[0])
+        for i in range(1,len(numberList)):
+            if int(numberList[i]) != pivot - 1:
                 return False
             pivot = int(numberList[i])
         return True
