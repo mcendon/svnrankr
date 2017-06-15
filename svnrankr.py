@@ -28,9 +28,9 @@ class SvnRankr:
             for i in range(1, now.month + 1):
                 self.ranking["history"][user][str(now.year) + str(format(i, '02'))] = 0
 
-            if yearAndMonth in self.ranking["history"][user]:
+            if yearAndMonth not in self.ranking["history"][user]:
                 self.ranking["history"][user][yearAndMonth] = 1
-        else:
+            else:
                 self.ranking["history"][user][yearAndMonth] += 1
 
         if self.ranking["range"]["date"]["to"] == None:
